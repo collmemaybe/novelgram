@@ -4,14 +4,14 @@ EXPOSE 80
 
 FROM microsoft/aspnetcore-build:2.0 AS build
 WORKDIR /src
-COPY Src/Src.csproj /Src
+COPY Src.csproj .
 RUN dotnet restore Src.csproj
 COPY . .
 WORKDIR /src
-RUN dotnet build Src/Src.csproj -c Release -o /app
+RUN dotnet build Src.csproj -c Release -o /app
 
 FROM build AS publish
-RUN dotnet publish Src/Src.csproj -c Release -o /app
+RUN dotnet publish Src.csproj -c Release -o /app
 
 FROM base AS final
 WORKDIR /app

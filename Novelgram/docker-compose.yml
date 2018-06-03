@@ -2,12 +2,12 @@ version: '3.4'
 
 services:
   src:
-    image: ${DOCKER_REGISTRY}src
+    image: ${DOCKER_REGISTRY}collmemaybe/novelgram
     secrets:
       - google
     build:
-      context: .
-      dockerfile: ../Src/Dockerfile
+      context: ../Src
+      dockerfile: Dockerfile
 
 secrets:
   google:

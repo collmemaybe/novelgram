@@ -60,4 +60,9 @@
     </ItemGroup>
   </Target>
 
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Amazon.ECS.Tools" Version="1.1.4" />
+  </ItemGroup>
 </Project>
+

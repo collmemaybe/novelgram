@@ -1,0 +1,26 @@
+
+{
+    "region" : "us-west-2",
+    "profile" : "default",
+    "configuration" : "Release",
+    "tag"           : "src:latest",
+    "cluster"       : "default",
+    "launch-type"   : "FARGATE",
+    "launch-subnets" : "subnet-723e590b,subnet-225bda69,subnet-079be75d",
+    "launch-security-groups" : "sg-4f5bd03e",
+    "assign-public-ip"       : true,
+    "task-definition-name"   : "Novelgram",
+    "task-cpu"               : "256",
+    "task-memory"            : "512",
+    "task-definition-task-role" : "arn:aws:iam::534252633203:role/ECSTask",
+    "task-execution-role"       : "ecsTaskExecutionRole",
+    "container-name"            : "Novelgram",
+    "container-port-mapping"    : "80:80",
+    "container-environment-variables" : "\"ASPNETCORE_ENVIRONMENT\"=\"Production\"",
+    "skip-image-push"                 : false,
+    "cluster-service"                 : "Novelgram",
+    "desired-count"                   : 1,
+    "deployment-minimum-healthy-percent" : 50,
+    "deployment-maximum-percent"         : 200,
+    "vstoolkit-deployment-mode"          : "DeployService"
+}
