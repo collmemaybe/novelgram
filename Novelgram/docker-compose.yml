@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  src:
+    image: ${DOCKER_REGISTRY}src
+    secrets:
+      - google
+    build:
+      context: .
+      dockerfile: ../Src/Dockerfile
+
+secrets:
+  google:
+    file: ../Src/Secrets/secrets.json

@@ -6,33 +6,37 @@ namespace Src
 
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.AspNetCore.SpaServices.Webpack;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
 
+    using Newtonsoft.Json.Linq;
+
     using Src.Models;
 
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            var secretsConfig = new ConfigurationBuilder().AddDockerSecrets().Build();
+            var googleSecrets = JObject.Parse(secretsConfig["google"])["google"];
+
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(this.configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("Auth"));
 
             services.AddLogging();
 
@@ -44,8 +48,8 @@ namespace Src
                 .AddCookie(o => o.LoginPath = new PathString("/Account/Login"))
                 .AddGoogle(o =>
                 {
-                    o.ClientId = Configuration["google:clientid"];
-                    o.ClientSecret = Configuration["google:clientsecret"];
+                    o.ClientId = (string)googleSecrets["clientid"];
+                    o.ClientSecret = (string)googleSecrets["clientsecret"];
                     o.SaveTokens = true;
                 });
 
