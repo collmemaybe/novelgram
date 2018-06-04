@@ -1,5 +1,7 @@
 namespace Src
 {
+    using Autofac.Extensions.DependencyInjection;
+
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
 
@@ -12,7 +14,9 @@ namespace Src
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureServices(services => services.AddAutofac())
                 .UseStartup<Startup>()
+                .BuildDynamo()
                 .Build();
     }
 }

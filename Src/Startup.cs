@@ -4,6 +4,12 @@ namespace Src
     using System.Net;
     using System.Threading.Tasks;
 
+    using Amazon.DynamoDBv2;
+    using Amazon.S3;
+    using Amazon.S3.Transfer;
+
+    using Autofac;
+
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
@@ -28,13 +34,15 @@ namespace Src
             this.configuration = configuration;
         }
 
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new AutofacModule());
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            var secretsConfig = new ConfigurationBuilder().AddDockerSecrets().Build();
-            var googleSecrets = JObject.Parse(secretsConfig["google"])["google"];
-
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(this.configuration.GetConnectionString("DefaultConnection")));
+            //var secretsConfig = new ConfigurationBuilder().AddDockerSecrets().Build();
+            //var googleSecrets = JObject.Parse(secretsConfig["google"])["google"];
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("Auth"));
 
@@ -48,25 +56,30 @@ namespace Src
                 .AddCookie(o => o.LoginPath = new PathString("/Account/Login"))
                 .AddGoogle(o =>
                 {
-                    o.ClientId = (string)googleSecrets["clientid"];
-                    o.ClientSecret = (string)googleSecrets["clientsecret"];
+                    o.ClientId = "942720052971-aeq763kvn9mltk74cuogi0ngqpqprep9.apps.googleusercontent.com";
+                    o.ClientSecret = "_ZZYPUnNQdAeyvpTsOUDmnLE";
                     o.SaveTokens = true;
                 });
 
             services.AddMvc();
 
-            Func<RedirectContext<CookieAuthenticationOptions>, Task> ReplaceRedirector(
+            services.AddDefaultAWSOptions(this.configuration.GetAWSOptions());
+            services.AddAWSService<IAmazonS3>();
+            services.AddAWSService<IAmazonDynamoDB>();
+
+            Task replaceRedirector(
+                RedirectContext<CookieAuthenticationOptions> context,
                 HttpStatusCode statusCode,
-                Func<RedirectContext<CookieAuthenticationOptions>, Task> existingRedirector) =>
-                context =>
+                Func<RedirectContext<CookieAuthenticationOptions>, Task> existingRedirector)
+            {
+                if (context.Request.Path.StartsWithSegments("/api"))
                 {
-                    if (context.Request.Path.StartsWithSegments("/api"))
-                    {
-                        context.Response.StatusCode = (int)statusCode;
-                        return Task.CompletedTask;
-                    }
-                    return existingRedirector(context);
-                };
+                    context.Response.StatusCode = (int)statusCode;
+                    return Task.CompletedTask;
+                }
+
+                return existingRedirector(context);
+            }
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -78,8 +91,8 @@ namespace Src
                 // ReturnUrlParameter requires `using Microsoft.AspNetCore.Authentication.Cookies;`
                 options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                 options.SlidingExpiration = true;
-                options.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Forbidden, options.Events.OnRedirectToAccessDenied);
-                options.Events.OnRedirectToLogin = ReplaceRedirector(HttpStatusCode.Unauthorized, options.Events.OnRedirectToLogin);
+                options.Events.OnRedirectToAccessDenied = context => replaceRedirector(context, HttpStatusCode.Forbidden, options.Events.OnRedirectToAccessDenied);
+                options.Events.OnRedirectToLogin = context => replaceRedirector(context, HttpStatusCode.Unauthorized, options.Events.OnRedirectToLogin);
             });
         }
 

@@ -13,6 +13,11 @@ namespace Src.Controllers
             return View();
         }
 
+        public IActionResult Keepalive()
+        {
+            return Ok();
+        }
+
         public IActionResult Error()
         {
             ViewData["RequestId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
