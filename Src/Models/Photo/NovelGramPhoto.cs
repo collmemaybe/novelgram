@@ -11,21 +11,16 @@
             DateTimeOffset timestamp)
         {
             this.UserId = userId;
-            this.Bucket = $"novelgram/{root}-{userId.Replace("@", string.Empty)}";
-            this.Key = key;
+            this.Key = $"{root}-{userId.Replace("@", string.Empty)}-{key}";
             this.Timestamp = timestamp;
         }
 
         public string UserId { get; }
-
-        public string Bucket { get; }
-
-        public string ThumbnailKey => this.FullId + "-t";
+        
+        public string ThumbnailKey => this.Key + "-t";
 
         public string Key { get; }
 
         public DateTimeOffset Timestamp { get; }
-
-        public string FullId => $"{this.Bucket}-{this.Key}";
     }
 }

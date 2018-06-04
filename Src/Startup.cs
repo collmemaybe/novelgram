@@ -57,8 +57,8 @@ namespace Src
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
             
+            services.AddMvc();
 
             services.AddDefaultAWSOptions(this.Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();

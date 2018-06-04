@@ -30,12 +30,22 @@ namespace Src.Controllers
                     await this.photoService.AddPhotoAsync(stream);
                 }
             }
-            
-            return Ok();
+
+            return Redirect("/");
         }
 
         [HttpGet]
         public async Task<IActionResult> Download(string userId, string key, bool isThumbnail)
+        {
+            using (var stream = await this.photoService.GetPhotoAsync(userId, key, isThumbnail))
+            {
+                // todo: handle other formats
+                return this.File(stream, "image/jpeg");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserPhotos(string userId, string key, bool isThumbnail)
         {
             using (var stream = await this.photoService.GetPhotoAsync(userId, key, isThumbnail))
             {

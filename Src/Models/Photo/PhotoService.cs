@@ -7,7 +7,6 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Amazon.S3;
     using Amazon.S3.Transfer;
 
     using Microsoft.Extensions.Logging;
@@ -59,7 +58,7 @@
 
             var downloadRequest = new TransferUtilityOpenStreamRequest
             {
-                BucketName = photo.Bucket,
+                BucketName = "novelgram",
                 Key = GetKey(photo, isThumbnail)
             };
 
@@ -103,8 +102,8 @@
         private async Task UploadToS3(Stream data, NovelGramPhoto photo, bool isThumbnail)
         {
             string key = GetKey(photo, isThumbnail);
-            await this.transferUtility.UploadAsync(data, photo.Bucket, key, CancellationToken.None);
-            this.logger.LogInformation($"Uploaded photo {photo.FullId}");
+            await this.transferUtility.UploadAsync(data, "novelgram", key, CancellationToken.None);
+            this.logger.LogInformation($"Uploaded photo {photo.Key}");
         }
 
         private static Stream ProcessThumbnail(Stream photoData, out IImageFormat format)
