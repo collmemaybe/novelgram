@@ -20,7 +20,7 @@ class Counter extends React.Component<CounterProps, {}> {
             <form method="post" enctype="multipart/form-data" asp-controller="UploadFiles" asp-action="Index">
                 <div class="form-group">
                     <div class="col-md-10">
-                        <input type="file" name="files" multiple />
+                        <input type="file" name="files" />
                     </div>
                 </div>
                 <div class="form-group">

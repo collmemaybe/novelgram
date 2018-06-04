@@ -3,8 +3,6 @@
     using System;
     using System.Threading.Tasks;
 
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Configuration;
 
     using Src.Models.User;
@@ -34,6 +32,12 @@
             {
                 throw new ArgumentException($"Missing key  {BucketNameKey}", nameof(configuration));
             }
+        }
+
+        public NovelGramPhoto BuildPhoto(string userId, NovelGramPhotoDetails details)
+        {
+            var timestamp = DateTimeOffset.FromUnixTimeSeconds(details.Timestamp);
+            return new NovelGramPhoto(this.root, userId, details.Key, timestamp);
         }
 
         public async Task<NovelGramPhoto> NewPhotoAsync()

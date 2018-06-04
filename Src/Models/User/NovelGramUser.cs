@@ -4,8 +4,6 @@
 
     using Newtonsoft.Json;
 
-    using Src.Models.Photo;
-
     [JsonObject]
     public class NovelGramUser
     {
@@ -13,6 +11,9 @@
         public string UserId { get; set; }
 
         [JsonProperty("photos")]
-        public IList<NovelGramPhoto> Photos { get; set; }
+        public IList<NovelGramPhotoDetails> PhotoKeys { get; set; }
+
+        [JsonProperty("friends")]
+        public IList<string> Friends { get; set; }
     }
 }

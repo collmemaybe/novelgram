@@ -20,7 +20,7 @@
 
         public string Bucket { get; }
 
-        public string Thumbnail => this.FullId + "-t";
+        public string ThumbnailKey => this.FullId + "-t";
 
         public string Key { get; }
 
