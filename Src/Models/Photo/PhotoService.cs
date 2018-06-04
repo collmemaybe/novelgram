@@ -10,7 +10,6 @@
     using Amazon.S3;
     using Amazon.S3.Transfer;
 
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
     using SixLabors.ImageSharp;
@@ -103,21 +102,15 @@
 
         private async Task UploadToS3(Stream data, NovelGramPhoto photo, bool isThumbnail)
         {
-            try
-            {
-                string key = GetKey(photo, isThumbnail);
-                await this.transferUtility.UploadAsync(data, photo.Bucket, key, CancellationToken.None);
-                this.logger.LogInformation($"Uploaded photo {photo.FullId}");
-            }
-            catch (AmazonS3Exception s3Exception)
-            {
-                this.logger.LogError(s3Exception, "Error uploading photo {0}", "");
-            }
+            string key = GetKey(photo, isThumbnail);
+            await this.transferUtility.UploadAsync(data, photo.Bucket, key, CancellationToken.None);
+            this.logger.LogInformation($"Uploaded photo {photo.FullId}");
         }
 
         private static Stream ProcessThumbnail(Stream photoData, out IImageFormat format)
         {
-            var image = Image.Load(photoData, out format);
+            format = ImageFormats.Jpeg;
+            var image = Image.Load(photoData, new JpegDecoder());
             var imageSize = image.Size();
 
             ResizeMode mode = imageSize.Height < ThumbnailSize.Height || imageSize.Width < ThumbnailSize.Width ? ResizeMode.Crop : ResizeMode.Stretch;

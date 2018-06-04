@@ -16,7 +16,6 @@ namespace Src
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureServices(services => services.AddAutofac())
                 .UseStartup<Startup>()
-                .BuildDynamo()
                 .Build();
     }
 }

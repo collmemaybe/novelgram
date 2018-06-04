@@ -12,20 +12,24 @@ namespace Src.Controllers
     using Microsoft.Extensions.Logging;
 
     using Src.Models;
+    using Src.Models.User;
 
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly INovelGramUserClient userClient;
         private readonly ILogger<AccountController> logger;
 
         public AccountController(
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
+            INovelGramUserClient userClient,
             ILogger<AccountController> logger)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.userClient = userClient;
             this.logger = logger;
         }
 
@@ -83,6 +87,14 @@ namespace Src.Controllers
                     {
                         await this.signInManager.SignInAsync(user, isPersistent: false);
                         this.logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+                        var novelUser = new NovelGramUser
+                        {
+                            UserId = model.Email
+                        };
+
+                        await this.userClient.SaveUserAsync(novelUser);
+
                         return RedirectToLocal(returnUrl);
                     }
                 }

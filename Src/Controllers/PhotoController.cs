@@ -1,6 +1,5 @@
 namespace Src.Controllers
 {
-    using System;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -9,25 +8,21 @@ namespace Src.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     using Src.Models.Photo;
-    using Src.Models.User;
 
     [Authorize]
     public class PhotoController : Controller
     {
-        private readonly INovelGramUserClient userClient;
-
         private readonly IPhotoService photoService;
 
         public PhotoController(IPhotoService photoService)
         {
-            this.userClient = userClient ?? throw new ArgumentNullException(nameof(userClient));
             this.photoService = photoService;
         }
 
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile formFile)
         {
-            if (formFile.Length > 0)
+            if (formFile?.Length > 0)
             {
                 using (var stream = new MemoryStream())
                 {

@@ -17,6 +17,7 @@
             builder.RegisterType<CurrentUserManager>().As<ICurrentUserManager>().InstancePerLifetimeScope();
             builder.RegisterType<NovelGramUserClient>().As<INovelGramUserClient>().InstancePerLifetimeScope();
             builder.RegisterType<PhotoService>().As<IPhotoService>().InstancePerLifetimeScope();
+            builder.RegisterType<DynamoBuilder>().As<IDynamoBuilder>().InstancePerLifetimeScope();
         }
     }
 }

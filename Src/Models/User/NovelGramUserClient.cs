@@ -17,6 +17,8 @@ namespace Src.Models.User
 
     public class NovelGramUserClient : INovelGramUserClient
     {
+        private readonly IDynamoBuilder dynamoBuilder;
+
         private readonly string userTableName;
 
         private readonly ICurrentUserManager currentUserManager;
@@ -26,8 +28,10 @@ namespace Src.Models.User
         public NovelGramUserClient(
             IAmazonDynamoDB dynamoClient,
             ICurrentUserManager currentUserManager,
+            IDynamoBuilder dynamoBuilder,
             IConfiguration configuration)
         {
+            this.dynamoBuilder = dynamoBuilder ?? throw new ArgumentNullException(nameof(dynamoBuilder));
             this.userTableName = configuration[DynamoBuilder.UserKey];
             this.currentUserManager = currentUserManager ?? throw new ArgumentNullException(nameof(currentUserManager));
             this.dynamoClient = dynamoClient ?? throw new ArgumentNullException(nameof(dynamoClient));
@@ -35,6 +39,8 @@ namespace Src.Models.User
 
         public async Task<IList<NovelGramUser>> GetUserBatchAsync(IList<string> userIds)
         {
+            await this.dynamoBuilder.BuildUserTable();
+
             if (userIds == null || !userIds.Any())
             {
                 return null;
@@ -59,6 +65,8 @@ namespace Src.Models.User
 
         public async Task<NovelGramUser> GetUserAsync(string userId)
         {
+            await this.dynamoBuilder.BuildUserTable();
+
             var request = new GetItemRequest
             {
                 TableName = this.userTableName,
@@ -71,6 +79,8 @@ namespace Src.Models.User
 
         public async Task SaveUserAsync(NovelGramUser user)
         {
+            await this.dynamoBuilder.BuildUserTable();
+
             if (user == null)
             {
                 return;
@@ -84,7 +94,7 @@ namespace Src.Models.User
                 
                 Item = new Dictionary<string, AttributeValue>
                 {
-                    { DynamoBuilder.UserKey, new AttributeValue(user.UserId ) },
+                    { DynamoBuilder.UserIdKey, new AttributeValue(user.UserId ) },
                     { DynamoBuilder.PayloadAttribute, new AttributeValue(payload) }
                 }
             };
@@ -107,7 +117,7 @@ namespace Src.Models.User
         {
             return new Dictionary<string, AttributeValue>
             {
-                { DynamoBuilder.UserKey, new AttributeValue(userId) }
+                { DynamoBuilder.UserIdKey, new AttributeValue(userId) }
             };
         }
 

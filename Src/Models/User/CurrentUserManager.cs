@@ -25,12 +25,12 @@
             var principal = this.httpContextAccessor.HttpContext.User;
             var user = await this.userManager.GetUserAsync(principal);
 
-            if (user?.Id == null)
+            if (user?.Email == null)
             {
                 throw new InvalidOperationException("No user present in the current context or no user id");
             }
 
-            return user.Id;
+            return user.Email;
         }
     }
 }

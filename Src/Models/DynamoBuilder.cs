@@ -1,18 +1,14 @@
 ﻿namespace Src
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.Model;
-
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
-    public static class DynamoBuilder
+    public class DynamoBuilder : IDynamoBuilder
     {
         public const string UserKey = "DynamoConfig:UserTableName";
 
@@ -20,29 +16,23 @@
 
         public const string PayloadAttribute = "Payload";
 
-        public static IWebHostBuilder BuildDynamo(this IWebHostBuilder webHostBuilder)
+        private readonly IAmazonDynamoDB client;
+
+        private readonly ILogger<LogContext> logger;
+
+        private readonly IConfiguration configuration;
+
+        public DynamoBuilder(
+            IAmazonDynamoDB client,
+            ILogger<LogContext> logger,
+            IConfiguration configuration)
         {
-            webHostBuilder.Configure(app =>
-            {
-                var env = app.ApplicationServices.GetService<IHostingEnvironment>();
-                dynamic startup = Activator.CreateInstance(typeof(Startup), env);
-
-                startup.Configure(app, env);
-
-                var dynamo = app.ApplicationServices.GetService<IAmazonDynamoDB>();
-                var logger = app.ApplicationServices.GetService<ILogger<LogContext>>();
-                var config = app.ApplicationServices.GetService<IConfiguration>();
-
-                dynamo.BuildUserTable(config, logger).GetAwaiter().GetResult();
-            });
-
-            return webHostBuilder;
+            this.client = client;
+            this.logger = logger;
+            this.configuration = configuration;
         }
 
-        private static async Task BuildUserTable(
-            this IAmazonDynamoDB client,
-            IConfiguration configuration,
-            ILogger logger)
+        public async Task BuildUserTable()
         {
             string tableName = configuration[UserKey];
 
@@ -61,7 +51,7 @@
                     {
                         new AttributeDefinition
                         {
-                            AttributeName = PayloadAttribute,
+                            AttributeName = UserIdKey,
                             AttributeType = ScalarAttributeType.S
                         }
                     },
@@ -72,14 +62,12 @@
                     }
                 );
 
-            await client.CreateTableIfNotPresentAsync(tableName, createRequest, logger);
+            await this.CreateTableIfNotPresentAsync(tableName, createRequest);
         }
 
-        private static async Task CreateTableIfNotPresentAsync(
-            this IAmazonDynamoDB client,
+        private async Task CreateTableIfNotPresentAsync(
             string tableName,
-            CreateTableRequest createRequest,
-            ILogger logger)
+            CreateTableRequest createRequest)
         {
             var tableList = await client.ListTablesAsync();
 

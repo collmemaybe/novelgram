@@ -27,12 +27,18 @@ namespace Src
 
     public class Startup
     {
-        private readonly IConfiguration configuration;
-
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            this.configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+
+            this.Configuration = builder.Build();
         }
+
+        public IConfiguration Configuration { get; }
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
@@ -52,18 +58,9 @@ namespace Src
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(o => o.LoginPath = new PathString("/Account/Login"))
-                .AddGoogle(o =>
-                {
-                    o.ClientId = "942720052971-aeq763kvn9mltk74cuogi0ngqpqprep9.apps.googleusercontent.com";
-                    o.ClientSecret = "_ZZYPUnNQdAeyvpTsOUDmnLE";
-                    o.SaveTokens = true;
-                });
+            
 
-            services.AddMvc();
-
-            services.AddDefaultAWSOptions(this.configuration.GetAWSOptions());
+            services.AddDefaultAWSOptions(this.Configuration.GetAWSOptions());
             services.AddAWSService<IAmazonS3>();
             services.AddAWSService<IAmazonDynamoDB>();
 
@@ -91,8 +88,8 @@ namespace Src
                 // ReturnUrlParameter requires `using Microsoft.AspNetCore.Authentication.Cookies;`
                 options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
                 options.SlidingExpiration = true;
-                options.Events.OnRedirectToAccessDenied = context => replaceRedirector(context, HttpStatusCode.Forbidden, options.Events.OnRedirectToAccessDenied);
-                options.Events.OnRedirectToLogin = context => replaceRedirector(context, HttpStatusCode.Unauthorized, options.Events.OnRedirectToLogin);
+                //options.Events.OnRedirectToAccessDenied = context => replaceRedirector(context, HttpStatusCode.Forbidden, options.Events.OnRedirectToAccessDenied);
+                //options.Events.OnRedirectToLogin = context => replaceRedirector(context, HttpStatusCode.Unauthorized, options.Events.OnRedirectToLogin);
             });
         }
 
